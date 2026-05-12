@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Settings, Bot } from 'lucide-react';
+import { Bell, Settings, Bot, Activity, SlidersHorizontal, User, LogOut } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
 import { HeroStatsCards } from './components/HeroStatsCards';
@@ -9,12 +9,25 @@ import { ControlPanel } from './components/ControlPanel';
 import { AlertFeed } from './components/AlertFeed';
 import { AIChatbot } from './components/AIChatbot';
 import { LandingPage } from './components/landing/LandingPage';
+import { LoginPage } from './components/LoginPage';
 
 export default function App() {
-  const [page, setPage] = useState<'landing' | 'dashboard'>('landing');
+  const [page, setPage] = useState<'landing' | 'login' | 'dashboard'>('landing');
   const [currentView, setCurrentView] = useState('dashboard');
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isChatbotOpen, setIsChatbotOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [welcomeMessage, setWelcomeMessage] = useState(
+    'Let us keep your aquaponics system healthy and stable today.',
+  );
   const alertCount = 3;
+
+  const greetings = [
+    'Your sensors are live and your controls are ready.',
+    'Great to see you again. Let us check system health together.',
+    'Today looks good for monitoring and quick maintenance checks.',
+  ];
 
   const handleViewChange = (view: string) => {
     if (view === 'ai') {
@@ -25,32 +38,52 @@ export default function App() {
     }
   };
 
+  const handleLogin = () => {
+    const randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+    setWelcomeMessage(randomGreeting);
+    setPage('dashboard');
+    setIsUserMenuOpen(false);
+  };
+
+  const handleLogout = () => {
+    setPage('login');
+    setIsChatbotOpen(false);
+    setIsUserMenuOpen(false);
+  };
+
   if (page === 'landing') {
     return (
       <LandingPage
-        onOpenDashboard={() => setPage('dashboard')}
+        onOpenDashboard={() => setPage('login')}
         onOpenAI={() => {
-          setPage('dashboard');
+          setPage('login');
           setIsChatbotOpen(true);
         }}
       />
     );
   }
 
+  if (page === 'login') {
+    return <LoginPage onLogin={handleLogin} onBack={() => setPage('landing')} />;
+  }
+
   return (
     <div className="min-h-screen bg-background pb-20 lg:pb-0">
-      {/* Sidebar - Desktop only */}
       <div className="hidden lg:block">
-        <Sidebar currentView={currentView} onViewChange={handleViewChange} alertCount={alertCount} />
+        <Sidebar
+          currentView={currentView}
+          onViewChange={handleViewChange}
+          alertCount={alertCount}
+          isCollapsed={isSidebarCollapsed}
+          onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
+          onGoLanding={() => setPage('landing')}
+        />
       </div>
 
-      {/* Mobile Navigation */}
       <MobileNav currentView={currentView} onViewChange={handleViewChange} alertCount={alertCount} />
 
-      {/* Main Content */}
-      <div className={`transition-all duration-300 ${isChatbotOpen ? 'lg:ml-[280px] lg:mr-[360px]' : 'lg:ml-[280px]'}`}>
-        {/* Header */}
-        <header className="fixed top-0 right-0 left-0 lg:left-[280px] h-16 lg:h-20 bg-card/95 backdrop-blur-lg border-b border-border-subtle z-30 px-4 lg:px-8">
+      <div className={`transition-all duration-300 ${isChatbotOpen ? 'lg:mr-[360px]' : ''} ${isSidebarCollapsed ? 'lg:ml-[60px]' : 'lg:ml-[280px]'}`}>
+        <header className={`fixed top-0 right-0 left-0 h-16 lg:h-20 bg-card/95 backdrop-blur-lg border-b border-border-subtle z-30 px-4 lg:px-8 transition-all duration-300 ${isSidebarCollapsed ? 'lg:left-[60px]' : 'lg:left-[280px]'}`}>
           <div className="h-full flex items-center justify-between">
             <div>
               <h1 className="text-xl lg:text-2xl font-semibold text-foreground">System Overview</h1>
@@ -65,12 +98,6 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
-              <button
-                onClick={() => setPage('landing')}
-                className="hidden sm:block px-3 py-2 text-sm rounded-lg border border-border-subtle text-muted-foreground hover:text-foreground hover:bg-surface-dark transition"
-              >
-                Landing
-              </button>
               <button className="relative p-2 lg:p-2.5 hover:bg-surface-dark rounded-xl transition-colors">
                 <Bell className="w-5 h-5 text-muted-foreground" />
                 {alertCount > 0 && (
@@ -81,9 +108,7 @@ export default function App() {
               <button
                 onClick={() => setIsChatbotOpen(!isChatbotOpen)}
                 className={`p-2 lg:p-2.5 rounded-xl transition-all hidden lg:flex ${
-                  isChatbotOpen
-                    ? 'bg-aqua-blue text-white'
-                    : 'hover:bg-surface-dark text-muted-foreground'
+                  isChatbotOpen ? 'bg-aqua-blue text-white' : 'hover:bg-surface-dark text-muted-foreground'
                 }`}
               >
                 <Bot className="w-5 h-5" />
@@ -93,21 +118,49 @@ export default function App() {
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
 
-              <button className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-aqua-blue to-green-growth flex items-center justify-center text-white font-semibold text-sm">
-                JD
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                  className="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-gradient-to-br from-aqua-blue to-green-growth flex items-center justify-center text-primary-foreground font-semibold text-sm"
+                >
+                  AK
+                </button>
+                {isUserMenuOpen && (
+                  <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border-subtle bg-card shadow-xl overflow-hidden z-50">
+                    <button
+                      onClick={() => {
+                        setIsProfileOpen(true);
+                        setIsUserMenuOpen(false);
+                      }}
+                      className="w-full px-3 py-2.5 text-sm text-left text-foreground hover:bg-surface-dark transition-colors flex items-center gap-2"
+                    >
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      View Profile
+                    </button>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full px-3 py-2.5 text-sm text-left text-danger-red hover:bg-danger-red/10 transition-colors flex items-center gap-2"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Logout
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </header>
 
-        {/* Content Area */}
         <main className="pt-20 lg:pt-24 px-4 lg:px-8 pb-12 space-y-6 lg:space-y-8">
           {currentView === 'dashboard' && (
             <>
-              {/* Hero Stats */}
+              <section className="rounded-lg border border-border-subtle bg-gradient-to-r from-card to-surface-dark p-5 lg:p-6">
+                <h2 className="text-2xl lg:text-3xl font-semibold text-foreground">Welcome Back Abdullah Khan</h2>
+                <p className="mt-2 text-sm lg:text-base text-muted-foreground">{welcomeMessage}</p>
+              </section>
+
               <HeroStatsCards />
 
-              {/* Real-Time Monitor & System Health */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 <div className="lg:col-span-2">
                   <RealTimeMonitor />
@@ -117,56 +170,108 @@ export default function App() {
                 </div>
               </div>
 
-              {/* Control Panel */}
               <ControlPanel />
-
-              {/* Alert Feed */}
               <AlertFeed />
             </>
           )}
 
           {currentView === 'analytics' && (
-            <div className="bg-card rounded-2xl p-12 border border-border-subtle text-center">
-              <h2 className="text-3xl font-semibold text-foreground mb-4">Analytics View</h2>
-              <p className="text-muted-foreground">
-                Detailed analytics and historical data visualization will appear here.
-              </p>
+            <div className="bg-card rounded-lg p-6 border border-border-subtle">
+              <div className="flex items-center gap-3 mb-5">
+                <Activity className="w-5 h-5 text-aqua-blue" />
+                <h2 className="text-2xl font-semibold text-foreground">AI Advisory Summary</h2>
+              </div>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {['pH drift is within safe bounds', 'Flow rate is slightly below baseline', 'Temperature trend is stable'].map((text, index) => (
+                  <div key={text} className="rounded-lg border border-border-subtle bg-surface-dark p-5">
+                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Finding {index + 1}</p>
+                    <p className="text-sm font-medium text-foreground">{text}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
-          {currentView === 'alerts' && (
-            <div className="bg-card rounded-2xl p-12 border border-border-subtle text-center">
-              <h2 className="text-3xl font-semibold text-foreground mb-4">All Alerts</h2>
-              <p className="text-muted-foreground">
-                Complete alert history and management will appear here.
-              </p>
-            </div>
-          )}
+          {currentView === 'alerts' && <AlertFeed />}
 
           {currentView === 'history' && (
-            <div className="bg-card rounded-2xl p-12 border border-border-subtle text-center">
-              <h2 className="text-3xl font-semibold text-foreground mb-4">System History</h2>
-              <p className="text-muted-foreground">
-                Timeline view of all system events and changes will appear here.
-              </p>
+            <div className="bg-card rounded-lg p-6 border border-border-subtle">
+              <h2 className="text-2xl font-semibold text-foreground mb-5">System History</h2>
+              <div className="space-y-3">
+                {[
+                  'Sensor readings synced to Firebase',
+                  'Low water-level alert acknowledged',
+                  'AI advisory report generated',
+                  'Air pump confirmed active',
+                ].map((event) => (
+                  <div key={event} className="flex items-center gap-3 rounded-lg border border-border-subtle bg-surface-dark p-4">
+                    <span className="w-2 h-2 rounded-full bg-aqua-blue" />
+                    <p className="text-sm text-foreground">{event}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
 
           {currentView === 'settings' && (
-            <div className="bg-card rounded-2xl p-12 border border-border-subtle text-center">
-              <h2 className="text-3xl font-semibold text-foreground mb-4">Settings</h2>
-              <p className="text-muted-foreground">
-                System configuration and preferences will appear here.
-              </p>
+            <div className="bg-card rounded-lg p-6 border border-border-subtle">
+              <div className="flex items-center gap-3 mb-5">
+                <SlidersHorizontal className="w-5 h-5 text-aqua-blue" />
+                <h2 className="text-2xl font-semibold text-foreground">Threshold Settings</h2>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[
+                  ['pH safe range', '6.8 - 7.5'],
+                  ['Temperature safe range', '20°C - 26°C'],
+                  ['Minimum flow rate', '2.0 L/m'],
+                  ['Minimum water level', '65%'],
+                ].map(([label, value]) => (
+                  <div key={label} className="rounded-lg border border-border-subtle bg-surface-dark p-4">
+                    <p className="text-sm text-muted-foreground">{label}</p>
+                    <p className="text-lg font-mono font-semibold text-foreground mt-1">{value}</p>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </main>
       </div>
 
-      {/* AI Chatbot */}
       <AIChatbot isOpen={isChatbotOpen} onClose={() => setIsChatbotOpen(false)} />
 
-      {/* Floating Action Button (Mobile) */}
+      {isProfileOpen && (
+        <div className="fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-xl border border-border-subtle bg-card p-6">
+            <h3 className="text-xl font-semibold text-foreground">Profile</h3>
+            <p className="text-sm text-muted-foreground mt-1">Account and operator details</p>
+
+            <div className="mt-5 space-y-3">
+              <div className="rounded-lg border border-border-subtle bg-surface-dark p-3">
+                <p className="text-xs text-muted-foreground">Name</p>
+                <p className="text-sm font-semibold text-foreground mt-1">Abdullah Khan</p>
+              </div>
+              <div className="rounded-lg border border-border-subtle bg-surface-dark p-3">
+                <p className="text-xs text-muted-foreground">Role</p>
+                <p className="text-sm font-semibold text-foreground mt-1">System Operator</p>
+              </div>
+              <div className="rounded-lg border border-border-subtle bg-surface-dark p-3">
+                <p className="text-xs text-muted-foreground">Email</p>
+                <p className="text-sm font-semibold text-foreground mt-1">abdullah.khan@aquaponics.local</p>
+              </div>
+            </div>
+
+            <div className="mt-5 flex justify-end">
+              <button
+                onClick={() => setIsProfileOpen(false)}
+                className="px-4 py-2 text-sm rounded-lg border border-border-subtle text-foreground hover:bg-surface-dark transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <button
         onClick={() => setIsChatbotOpen(true)}
         className="fixed bottom-6 right-6 lg:hidden w-14 h-14 bg-aqua-blue rounded-full shadow-lg flex items-center justify-center z-50"

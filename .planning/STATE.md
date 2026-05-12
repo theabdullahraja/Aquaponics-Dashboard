@@ -1,3 +1,16 @@
+---
+gsd_state_version: 1.0
+milestone: v1.0
+milestone_name: — Enhanced Demo
+status: executing
+last_updated: "2026-05-10T18:05:48.981Z"
+progress:
+  total_phases: 4
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+---
+
 # Project State
 
 ## Project Reference
@@ -10,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-05-10)
 ## Current Phase
 
 **Phase 1: Landing Page**
-Status: ○ Pending
+Status: Executing Phase 1
 Goal: Replace the minimal card landing page with a visually impressive full-screen hero page.
 
 ## Phase Progress

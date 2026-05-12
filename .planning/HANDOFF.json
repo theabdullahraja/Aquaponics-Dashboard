@@ -1,0 +1,134 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-05-10T21:17:13.499Z",
+  "source": "auto-postool",
+  "partial": false,
+  "phase": null,
+  "phase_name": null,
+  "phase_dir": null,
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "auto-checkpoint",
+  "completed_tasks": [],
+  "remaining_tasks": [],
+  "blockers": [],
+  "human_actions_pending": [],
+  "decisions": [],
+  "uncommitted_files": [
+    {
+      "status": "M",
+      "path": ".planning/STATE.md"
+    },
+    {
+      "status": "M",
+      "path": ".planning/config.json"
+    },
+    {
+      "status": "M",
+      "path": "src/app/components/landing/LandingPage.tsx"
+    },
+    {
+      "status": "??",
+      "path": ".planning/phases/"
+    },
+    {
+      "status": "??",
+      "path": "ATTRIBUTIONS.md"
+    },
+    {
+      "status": "??",
+      "path": "README.md"
+    },
+    {
+      "status": "??",
+      "path": "default_shadcn_theme.css"
+    },
+    {
+      "status": "??",
+      "path": "dist/"
+    },
+    {
+      "status": "??",
+      "path": "guidelines/"
+    },
+    {
+      "status": "??",
+      "path": "index.html"
+    },
+    {
+      "status": "??",
+      "path": "node_modules/"
+    },
+    {
+      "status": "??",
+      "path": "package-lock.json"
+    },
+    {
+      "status": "??",
+      "path": "package.json"
+    },
+    {
+      "status": "??",
+      "path": "pnpm-workspace.yaml"
+    },
+    {
+      "status": "??",
+      "path": "postcss.config.mjs"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/AIChatbot.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/AlertFeed.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/ControlPanel.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/HeroStatsCards.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/MobileNav.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/RealTimeMonitor.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/Sidebar.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/SystemHealth.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/figma/"
+    },
+    {
+      "status": "??",
+      "path": "src/app/components/ui/"
+    },
+    {
+      "status": "??",
+      "path": "src/main.tsx"
+    },
+    {
+      "status": "??",
+      "path": "src/styles/"
+    },
+    {
+      "status": "??",
+      "path": "vite.config.ts"
+    }
+  ],
+  "next_action": "Executing Phase 1",
+  "context_notes": "Status: Executing Phase 1\n\nRecent commits:\n71045c4 redesign(phase-1): replace blob hero with live sensor gauge rings\nabd1096 feat(phase-1): add animated LandingPage and wire into App\n606c309 feat(phase-1): add FeatureTiles and AnimatedStats landing sub-components\ndc8abc9 docs: initialize GSD project -- Smart Aquaponics Dashboard v1.0"
+}
