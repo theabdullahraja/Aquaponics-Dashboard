@@ -1,6 +1,9 @@
 // Vercel serverless function: POST /api/chat
 // Keeps the Groq API key server-side (never shipped to the browser).
-import { chatComplete } from './_chat-core';
+import { chatComplete } from './_chat-core.js'; // .js extension required under Vercel's ESM/nodenext resolution
+
+// `process` is a Node runtime global; declare it so the function type-checks without @types/node.
+declare const process: { env: Record<string, string | undefined> };
 
 export default async function handler(req: any, res: any) {
   if (req.method !== 'POST') {
