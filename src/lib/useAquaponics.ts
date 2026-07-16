@@ -96,19 +96,38 @@ export async function setPumpCommand(target: ActuatorTarget, state: boolean) {
   return supabase.from('commands').update({ state, updated_at: 'now' }).eq('target', target);
 }
 
-/** True while the newest reading is fresh (device is pushing). Drives the "System Online" badge. */
-export function useSystemOnline(reading: Reading | null, thresholdMs = 12000) {
+/** True while new readings keep arriving (device is pushing). Drives the "System Online" badge.
+ *
+ *  Clock-skew-proof: instead of comparing the reading's timestamp to the browser clock (which
+ *  breaks if the laptop clock is even slightly off — a fresh reading then looks "stale"), we
+ *  watch the reading id change and measure the gap with LOCAL elapsed time only. If a newer row
+ *  appears within `staleMs`, we're online — regardless of whether the wall clock is correct. */
+export function useSystemOnline(reading: Reading | null, staleMs = 15000) {
   const [online, setOnline] = useState(false);
-  const readingRef = useRef(reading);
-  readingRef.current = reading;
+  const lastIdRef = useRef<number | null>(null);
+  const lastChangeRef = useRef<number>(Date.now());
+
   useEffect(() => {
-    const check = () => {
-      const r = readingRef.current;
-      setOnline(!!r && Date.now() - new Date(r.ts).getTime() < thresholdMs);
-    };
-    check();
-    const t = setInterval(check, 2000);
+    if (!reading) return;
+    if (lastIdRef.current === null) {
+      // First reading we ever see: don't assume it's live (the row could be old). Wait for the
+      // next row to arrive before declaring online.
+      lastIdRef.current = reading.id;
+      return;
+    }
+    if (reading.id !== lastIdRef.current) {
+      lastIdRef.current = reading.id;
+      lastChangeRef.current = Date.now();
+      setOnline(true);
+    }
+  }, [reading]);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      setOnline(Date.now() - lastChangeRef.current < staleMs);
+    }, 2000);
     return () => clearInterval(t);
-  }, [thresholdMs]);
+  }, [staleMs]);
+
   return online;
 }
