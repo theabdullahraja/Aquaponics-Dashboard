@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Bell, Settings, Bot, Activity, SlidersHorizontal, User, LogOut } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Bell, Settings, Bot, SlidersHorizontal, User, LogOut } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
 import { HeroStatsCards } from './components/HeroStatsCards';
@@ -10,6 +10,12 @@ import { AlertFeed } from './components/AlertFeed';
 import { AIChatbot } from './components/AIChatbot';
 import { LandingPage } from './components/landing/LandingPage';
 import { LoginPage } from './components/LoginPage';
+import { SystemStatusBadge } from './components/SystemStatusBadge';
+import { PastData } from './components/PastData';
+import { Analytics } from './components/Analytics';
+import { useLatestReading, useSystemOnline } from '../lib/useAquaponics';
+import { alertsFromReading } from '../lib/health';
+import { getSession, onAuthChange, signOut } from '../lib/auth';
 
 export default function App() {
   const [page, setPage] = useState<'landing' | 'login' | 'dashboard'>('landing');
@@ -21,7 +27,24 @@ export default function App() {
   const [welcomeMessage, setWelcomeMessage] = useState(
     'Let us keep your aquaponics system healthy and stable today.',
   );
-  const alertCount = 3;
+  const [authed, setAuthed] = useState(false);
+  const latestReading = useLatestReading();
+  const online = useSystemOnline(latestReading);
+  const alertCount = alertsFromReading(latestReading, online).length;
+
+  // Restore a persisted Supabase session on refresh; kick back to login if it ends.
+  useEffect(() => {
+    getSession().then((session) => {
+      if (session) {
+        setAuthed(true);
+        setPage((p) => (p === 'login' ? 'dashboard' : p));
+      }
+    });
+    return onAuthChange((session) => {
+      setAuthed(!!session);
+      if (!session) setPage((p) => (p === 'dashboard' ? 'login' : p));
+    });
+  }, []);
 
   const greetings = [
     'Your sensors are live and your controls are ready.',
@@ -45,7 +68,8 @@ export default function App() {
     setIsUserMenuOpen(false);
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await signOut();
     setPage('login');
     setIsChatbotOpen(false);
     setIsUserMenuOpen(false);
@@ -54,9 +78,9 @@ export default function App() {
   if (page === 'landing') {
     return (
       <LandingPage
-        onOpenDashboard={() => setPage('login')}
+        onOpenDashboard={() => setPage(authed ? 'dashboard' : 'login')}
         onOpenAI={() => {
-          setPage('login');
+          setPage(authed ? 'dashboard' : 'login');
           setIsChatbotOpen(true);
         }}
       />
@@ -77,6 +101,7 @@ export default function App() {
           isCollapsed={isSidebarCollapsed}
           onToggleCollapse={() => setIsSidebarCollapsed((prev) => !prev)}
           onGoLanding={() => setPage('landing')}
+          online={online}
         />
       </div>
 
@@ -86,7 +111,10 @@ export default function App() {
         <header className={`fixed top-0 right-0 left-0 h-16 lg:h-20 bg-card/95 backdrop-blur-lg border-b border-border-subtle z-30 px-4 lg:px-8 transition-all duration-300 ${isSidebarCollapsed ? 'lg:left-[60px]' : 'lg:left-[280px]'}`}>
           <div className="h-full flex items-center justify-between">
             <div>
-              <h1 className="text-xl lg:text-2xl font-semibold text-foreground">System Overview</h1>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl lg:text-2xl font-semibold text-foreground">System Overview</h1>
+                <SystemStatusBadge />
+              </div>
               <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 hidden sm:block">
                 {new Date().toLocaleDateString('en-US', {
                   weekday: 'long',
@@ -98,7 +126,11 @@ export default function App() {
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
-              <button className="relative p-2 lg:p-2.5 hover:bg-surface-dark rounded-xl transition-colors">
+              <button
+                onClick={() => setCurrentView('alerts')}
+                aria-label="View alerts"
+                className="relative p-2 lg:p-2.5 hover:bg-surface-dark rounded-xl transition-colors"
+              >
                 <Bell className="w-5 h-5 text-muted-foreground" />
                 {alertCount > 0 && (
                   <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-danger-red rounded-full" />
@@ -114,7 +146,11 @@ export default function App() {
                 <Bot className="w-5 h-5" />
               </button>
 
-              <button className="p-2 lg:p-2.5 hover:bg-surface-dark rounded-xl transition-colors hidden sm:block">
+              <button
+                onClick={() => setCurrentView('settings')}
+                aria-label="Open settings"
+                className="p-2 lg:p-2.5 hover:bg-surface-dark rounded-xl transition-colors hidden sm:block"
+              >
                 <Settings className="w-5 h-5 text-muted-foreground" />
               </button>
 
@@ -175,43 +211,11 @@ export default function App() {
             </>
           )}
 
-          {currentView === 'analytics' && (
-            <div className="bg-card rounded-lg p-6 border border-border-subtle">
-              <div className="flex items-center gap-3 mb-5">
-                <Activity className="w-5 h-5 text-aqua-blue" />
-                <h2 className="text-2xl font-semibold text-foreground">AI Advisory Summary</h2>
-              </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                {['pH drift is within safe bounds', 'Flow rate is slightly below baseline', 'Temperature trend is stable'].map((text, index) => (
-                  <div key={text} className="rounded-lg border border-border-subtle bg-surface-dark p-5">
-                    <p className="text-xs uppercase tracking-widest text-muted-foreground mb-2">Finding {index + 1}</p>
-                    <p className="text-sm font-medium text-foreground">{text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {currentView === 'analytics' && <Analytics />}
 
           {currentView === 'alerts' && <AlertFeed />}
 
-          {currentView === 'history' && (
-            <div className="bg-card rounded-lg p-6 border border-border-subtle">
-              <h2 className="text-2xl font-semibold text-foreground mb-5">System History</h2>
-              <div className="space-y-3">
-                {[
-                  'Sensor readings synced to Firebase',
-                  'Low water-level alert acknowledged',
-                  'AI advisory report generated',
-                  'Air pump confirmed active',
-                ].map((event) => (
-                  <div key={event} className="flex items-center gap-3 rounded-lg border border-border-subtle bg-surface-dark p-4">
-                    <span className="w-2 h-2 rounded-full bg-aqua-blue" />
-                    <p className="text-sm text-foreground">{event}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {currentView === 'history' && <PastData />}
 
           {currentView === 'settings' && (
             <div className="bg-card rounded-lg p-6 border border-border-subtle">
@@ -224,7 +228,6 @@ export default function App() {
                   ['pH safe range', '6.8 - 7.5'],
                   ['Temperature safe range', '20°C - 26°C'],
                   ['Minimum flow rate', '2.0 L/m'],
-                  ['Minimum water level', '65%'],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-lg border border-border-subtle bg-surface-dark p-4">
                     <p className="text-sm text-muted-foreground">{label}</p>

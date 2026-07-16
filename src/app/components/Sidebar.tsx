@@ -7,6 +7,7 @@ interface SidebarProps {
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   onGoLanding: () => void;
+  online?: boolean;
 }
 
 export function Sidebar({
@@ -16,12 +17,13 @@ export function Sidebar({
   isCollapsed,
   onToggleCollapse,
   onGoLanding,
+  online = false,
 }: SidebarProps) {
   const menuItems = [
     { id: 'dashboard', icon: Home, label: 'Dashboard' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics' },
     { id: 'alerts', icon: Bell, label: 'Alerts', badge: alertCount },
-    { id: 'history', icon: Clock, label: 'History' },
+    { id: 'history', icon: Clock, label: 'Past Data' },
     { id: 'ai', icon: Bot, label: 'AI Assistant', highlight: true },
     { id: 'settings', icon: Settings, label: 'Settings' },
   ];
@@ -94,8 +96,10 @@ export function Sidebar({
       {!isCollapsed && (
         <div className="absolute bottom-0 left-0 right-0 p-6 border-t border-border-subtle space-y-3">
           <div className="flex items-center gap-2 text-sm">
-            <div className="w-2 h-2 bg-green-growth rounded-full animate-pulse" />
-            <span className="text-muted-foreground">All Systems Normal</span>
+            <div
+              className={`w-2 h-2 rounded-full ${online ? 'bg-green-growth animate-pulse' : 'bg-danger-red'}`}
+            />
+            <span className="text-muted-foreground">{online ? 'Device Online' : 'Device Offline'}</span>
           </div>
 
           <div className="flex items-center gap-3">
@@ -104,7 +108,7 @@ export function Sidebar({
             </div>
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-foreground truncate">Abdullah Khan</p>
-              <p className="text-xs text-muted-foreground">Last sync: 2m ago</p>
+              <p className="text-xs text-muted-foreground">System Operator</p>
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
-import { Bot, Send, X, Minimize2, Maximize2, Paperclip, Mic } from 'lucide-react';
+import { Bot, Send, X, Minimize2, Maximize2 } from 'lucide-react';
 import { useState } from 'react';
+import { askAssistant, type ChatMessage } from '../../lib/chat';
 
 interface Message {
   id: string;
@@ -25,8 +26,8 @@ export function AIChatbot({ isOpen, onClose }: AIChatbotProps) {
     'Best practices for fish care',
   ];
 
-  const handleSendMessage = () => {
-    if (!inputValue.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isTyping) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -35,21 +36,35 @@ export function AIChatbot({ isOpen, onClose }: AIChatbotProps) {
       timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
     setInputValue('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const history: ChatMessage[] = updatedMessages.map((m) => ({
+        role: m.type === 'user' ? 'user' : 'assistant',
+        content: m.content,
+      }));
+      const reply = await askAssistant(history);
       const aiMessage: Message = {
         id: (Date.now() + 1).toString(),
         type: 'ai',
-        content:
-          "I can help with that. Start with stable water checks, then adjust in small steps and watch trends for at least one cycle before further changes.",
+        content: reply,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
       setMessages((prev) => [...prev, aiMessage]);
+    } catch (err) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'ai',
+        content: 'Sorry, I could not reach the assistant right now. Please check that GROQ_API_KEY is set and try again.',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
       setIsTyping(false);
-    }, 1200);
+    }
   };
 
   const handleQuickQuestion = (question: string) => {
@@ -237,10 +252,6 @@ export function AIChatbot({ isOpen, onClose }: AIChatbotProps) {
         )}
 
         <div className="flex items-center gap-2">
-          <button className="p-2.5 hover:bg-surface-dark rounded-lg transition-colors">
-            <Paperclip className="w-5 h-5 text-muted-foreground" />
-          </button>
-
           <input
             type="text"
             value={inputValue}
@@ -248,17 +259,14 @@ export function AIChatbot({ isOpen, onClose }: AIChatbotProps) {
             onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}
             placeholder="Type your question..."
             className="flex-1 bg-input border border-border-subtle rounded-xl px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-aqua-blue/50"
+            disabled={isTyping}
           />
-
           <button
             onClick={handleSendMessage}
-            className="p-2.5 bg-aqua-blue rounded-xl hover:opacity-95 transition-all"
+            disabled={isTyping || !inputValue.trim()}
+            className="p-2.5 bg-aqua-blue rounded-xl hover:opacity-95 transition-all disabled:opacity-50"
           >
             <Send className="w-5 h-5 text-white" />
-          </button>
-
-          <button className="p-2.5 hover:bg-surface-dark rounded-lg transition-colors">
-            <Mic className="w-5 h-5 text-muted-foreground" />
           </button>
         </div>
       </div>

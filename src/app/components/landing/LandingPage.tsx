@@ -12,18 +12,12 @@ const sensors = [
   { id: 'ph',    label: 'pH Level',    value: 7.2,  max: 14,  unit: '',    color: '#22D3EE', delay: 0   },
   { id: 'temp',  label: 'Temperature', value: 23.5, max: 40,  unit: '°C',  color: '#FB923C', delay: 120 },
   { id: 'flow',  label: 'Water Flow',  value: 2.4,  max: 4,   unit: 'L/m', color: '#4ADE80', delay: 240 },
-  { id: 'level', label: 'Water Level', value: 85,   max: 100, unit: '%',   color: '#86EFAC', delay: 360 },
 ];
 
 const tickerData = [
-  { label: 'pH',           value: '7.2',       status: 'optimal' },
-  { label: 'Temperature',  value: '23.5°C',    status: 'normal'  },
-  { label: 'Water Flow',   value: '2.4 L/m',   status: 'warning' },
-  { label: 'Water Level',  value: '85%',        status: 'optimal' },
-  { label: 'Dissolved O₂', value: '8.2 mg/L',  status: 'optimal' },
-  { label: 'Ammonia',      value: '0.02 ppm',  status: 'optimal' },
-  { label: 'Nitrite',      value: '0.1 ppm',   status: 'normal'  },
-  { label: 'EC',           value: '1.8 mS/cm', status: 'optimal' },
+  { label: 'pH',          value: '7.2',     status: 'optimal' },
+  { label: 'Temperature', value: '23.5°C',  status: 'normal'  },
+  { label: 'Water Flow',  value: '2.4 L/m', status: 'warning' },
 ];
 
 const STATUS_COLOR: Record<string, string> = {

@@ -1,27 +1,30 @@
-import { Check, AlertTriangle } from 'lucide-react';
+import { Check, AlertTriangle, HelpCircle } from 'lucide-react';
+import { useLatestReading, useSystemOnline } from '../../lib/useAquaponics';
+import { evaluateReading, healthFromReading, type Status } from '../../lib/health';
+
+function statusView(status: Status) {
+  switch (status) {
+    case 'ok':
+      return { icon: Check, color: '#10B981', text: 'normal' };
+    case 'high':
+      return { icon: AlertTriangle, color: '#F59E0B', text: 'high' };
+    case 'low':
+      return { icon: AlertTriangle, color: '#F59E0B', text: 'low' };
+    default:
+      return { icon: HelpCircle, color: '#94A3B8', text: 'no data' };
+  }
+}
 
 export function SystemHealth() {
-  const healthScore = 94;
-  const healthItems = [
-    { label: 'pH', status: 'optimal', icon: Check, color: '#10B981' },
-    { label: 'Temp', status: 'normal', icon: Check, color: '#10B981' },
-    { label: 'Flow', status: 'low', icon: AlertTriangle, color: '#F59E0B' },
-  ];
+  const reading = useLatestReading();
+  const online = useSystemOnline(reading);
+  const evals = evaluateReading(reading);
+  const { score, label } = healthFromReading(reading, online);
 
   const circumference = 2 * Math.PI * 54;
-  const offset = circumference - (healthScore / 100) * circumference;
+  const offset = circumference - (score / 100) * circumference;
 
-  const getHealthColor = () => {
-    if (healthScore >= 90) return '#10B981';
-    if (healthScore >= 70) return '#F59E0B';
-    return '#EF4444';
-  };
-
-  const getHealthLabel = () => {
-    if (healthScore >= 90) return 'Excellent';
-    if (healthScore >= 70) return 'Good';
-    return 'Needs Attention';
-  };
+  const ringColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
   return (
     <div className="bg-card rounded-lg p-5 border border-border-subtle h-full">
@@ -31,63 +34,58 @@ export function SystemHealth() {
       <div className="flex flex-col items-center mb-6">
         <div className="relative w-32 h-32">
           <svg className="transform -rotate-90" width="128" height="128">
+            <circle cx="64" cy="64" r="54" stroke="#334155" strokeWidth="12" fill="none" />
             <circle
               cx="64"
               cy="64"
               r="54"
-              stroke="#334155"
-              strokeWidth="12"
-              fill="none"
-            />
-            <circle
-              cx="64"
-              cy="64"
-              r="54"
-              stroke={getHealthColor()}
+              stroke={ringColor}
               strokeWidth="12"
               fill="none"
               strokeDasharray={circumference}
               strokeDashoffset={offset}
               strokeLinecap="round"
               className="transition-all duration-1000"
-              style={{
-                filter: `drop-shadow(0 0 8px ${getHealthColor()}40)`,
-              }}
+              style={{ filter: `drop-shadow(0 0 8px ${ringColor}40)` }}
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-3xl font-bold text-foreground font-mono">{healthScore}%</span>
+            <span className="text-3xl font-bold text-foreground font-mono">{score}%</span>
           </div>
         </div>
-        <p className="mt-3 text-lg font-semibold" style={{ color: getHealthColor() }}>
-          {getHealthLabel()}
+        <p className="mt-3 text-lg font-semibold" style={{ color: ringColor }}>
+          {label}
         </p>
       </div>
 
       {/* Health Items */}
       <div className="space-y-3">
-        {healthItems.map((item) => {
-          const Icon = item.icon;
+        {evals.map((item) => {
+          const v = statusView(item.status);
+          const Icon = v.icon;
           return (
-            <div key={item.label} className="flex items-center gap-3">
+            <div key={item.key} className="flex items-center gap-3">
               <div
                 className="w-8 h-8 rounded-lg flex items-center justify-center"
-                style={{ backgroundColor: `${item.color}15` }}
+                style={{ backgroundColor: `${v.color}15` }}
               >
-                <Icon className="w-4 h-4" style={{ color: item.color }} />
+                <Icon className="w-4 h-4" style={{ color: v.color }} />
               </div>
               <span className="text-sm font-medium text-foreground">{item.label}:</span>
-              <span className="text-sm font-semibold" style={{ color: item.color }}>
-                {item.status}
+              <span className="text-sm font-semibold" style={{ color: v.color }}>
+                {v.text}
               </span>
+              <span className="ml-auto text-sm font-mono text-muted-foreground">{item.text}</span>
             </div>
           );
         })}
       </div>
 
       <div className="mt-5 rounded-lg border border-border-subtle bg-surface-dark p-3">
-        <p className="text-xs text-muted-foreground">Rule engine status</p>
-        <p className="text-sm font-semibold text-foreground mt-1">Threshold monitoring active</p>
+        <p className="text-xs text-muted-foreground">Monitoring</p>
+        <p className="text-sm font-semibold text-foreground mt-1">
+          {online ? 'Live threshold checks active' : 'Device offline — no live data'}
+        </p>
       </div>
     </div>
   );
