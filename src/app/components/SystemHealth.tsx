@@ -27,14 +27,14 @@ export function SystemHealth() {
   const ringColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
 
   return (
-    <div className="bg-card rounded-lg p-5 border border-border-subtle h-full">
+    <div className="min-w-0 bg-card rounded-xl p-5 border border-border-subtle h-full">
       <h3 className="text-lg font-semibold text-foreground mb-6">System Health</h3>
 
       {/* Circular Progress */}
       <div className="flex flex-col items-center mb-6">
         <div className="relative w-32 h-32">
           <svg className="transform -rotate-90" width="128" height="128">
-            <circle cx="64" cy="64" r="54" stroke="#334155" strokeWidth="12" fill="none" />
+            <circle cx="64" cy="64" r="54" stroke="#1F3A22" strokeWidth="12" fill="none" />
             <circle
               cx="64"
               cy="64"
@@ -71,11 +71,13 @@ export function SystemHealth() {
               >
                 <Icon className="w-4 h-4" style={{ color: v.color }} />
               </div>
-              <span className="text-sm font-medium text-foreground">{item.label}:</span>
-              <span className="text-sm font-semibold" style={{ color: v.color }}>
-                {v.text}
-              </span>
-              <span className="ml-auto text-sm font-mono text-muted-foreground">{item.text}</span>
+              <div className="min-w-0 flex-1 leading-tight">
+                <p className="text-sm font-medium text-foreground">{item.label}</p>
+                <p className="text-xs font-semibold capitalize" style={{ color: v.color }}>
+                  {v.text}
+                </p>
+              </div>
+              <span className="shrink-0 font-mono text-sm text-foreground">{item.text}</span>
             </div>
           );
         })}

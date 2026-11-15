@@ -13,7 +13,7 @@ export function SystemStatusBadge() {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-semibold ${
         online
           ? 'border-green-growth/30 bg-green-growth/10 text-green-growth'
           : 'border-danger-red/30 bg-danger-red/10 text-danger-red'
@@ -21,8 +21,14 @@ export function SystemStatusBadge() {
       title={reading ? `Last reading ${ageText}` : 'No readings received'}
     >
       {online ? <Wifi className="w-3.5 h-3.5" /> : <WifiOff className="w-3.5 h-3.5" />}
-      {online ? 'System Online' : 'Offline'}
-      <span className="font-normal opacity-70">· {ageText}</span>
+      {online ? (
+        <>
+          <span className="hidden sm:inline">System&nbsp;</span>Online
+        </>
+      ) : (
+        'Offline'
+      )}
+      <span className="hidden font-normal opacity-70 sm:inline">· {ageText}</span>
     </span>
   );
 }

@@ -21,6 +21,17 @@ export type ActuatorStatus = {
 // Poll cadence: ESP pushes readings every ~3s, so 2s polling shows fresh data within ~2s.
 const POLL_MS = 2000;
 
+/** Sensor-fault filter. Values outside the sensors' physical range are electrical glitches, not
+ *  measurements, and would wreck chart scales and statistics:
+ *   - DS18B20 reports -127 °C when not detected and 85 °C as its power-on default.
+ *   - YF-S201 is rated 1–30 L/min; larger values are air-pump EMI pulses (see test log).
+ *  Invalid values become null (charts leave a gap; the raw row stays in the database). */
+export function sanitizeReading(r: Reading): Reading {
+  const temp = r.temp_c != null && r.temp_c > -55 && r.temp_c < 85 ? r.temp_c : null;
+  const flow = r.flow_lpm != null && r.flow_lpm >= 0 && r.flow_lpm <= 30 ? r.flow_lpm : null;
+  return { ...r, temp_c: temp, flow_lpm: flow };
+}
+
 /** Latest sensor reading, refreshed every 2s. */
 export function useLatestReading() {
   const [reading, setReading] = useState<Reading | null>(null);
@@ -32,7 +43,7 @@ export function useLatestReading() {
         .select('*')
         .order('id', { ascending: false })
         .limit(1);
-      if (active && data && data[0]) setReading(data[0] as Reading);
+      if (active && data && data[0]) setReading(sanitizeReading(data[0] as Reading));
     };
     load();
     const t = setInterval(load, POLL_MS);
@@ -55,7 +66,7 @@ export function useReadingsHistory(limit = 60) {
         .select('*')
         .order('id', { ascending: false })
         .limit(limit);
-      if (active && data) setRows([...(data as Reading[])].reverse());
+      if (active && data) setRows([...(data as Reading[])].reverse().map(sanitizeReading));
     };
     load();
     const t = setInterval(load, POLL_MS);
@@ -105,7 +116,9 @@ export async function setPumpCommand(target: ActuatorTarget, state: boolean) {
 export function useSystemOnline(reading: Reading | null, staleMs = 15000) {
   const [online, setOnline] = useState(false);
   const lastIdRef = useRef<number | null>(null);
-  const lastChangeRef = useRef<number>(Date.now());
+  // 0 = "no new row seen yet" -> stays Offline until a row actually arrives (previously this
+  // started at Date.now(), so every page load showed a false "Online" for the first 15 s).
+  const lastChangeRef = useRef<number>(0);
 
   useEffect(() => {
     if (!reading) return;

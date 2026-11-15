@@ -190,9 +190,22 @@ export default function App() {
         <main className="pt-20 lg:pt-24 px-4 lg:px-8 pb-12 space-y-6 lg:space-y-8">
           {currentView === 'dashboard' && (
             <>
-              <section className="rounded-lg border border-border-subtle bg-gradient-to-r from-card to-surface-dark p-5 lg:p-6">
-                <h2 className="text-2xl lg:text-3xl font-semibold text-foreground">Welcome Back Abdullah Khan</h2>
-                <p className="mt-2 text-sm lg:text-base text-muted-foreground">{welcomeMessage}</p>
+              <section className="relative overflow-hidden rounded-xl border border-border-subtle bg-gradient-to-r from-card via-card to-surface-dark p-5 lg:p-6">
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-aqua-blue/10 blur-3xl"
+                />
+                <div
+                  aria-hidden
+                  className="pointer-events-none absolute -bottom-24 right-10 h-56 w-56 rounded-full bg-aqua-blue-light/10 blur-3xl"
+                />
+                <div className="relative">
+                  <p className="text-xs font-semibold uppercase tracking-widest text-aqua-blue">Smart Aquaponics</p>
+                  <h2 className="mt-1.5 text-2xl lg:text-3xl font-semibold tracking-tight text-foreground">
+                    Welcome back, Abdullah Khan
+                  </h2>
+                  <p className="mt-1.5 text-sm lg:text-base text-muted-foreground">{welcomeMessage}</p>
+                </div>
               </section>
 
               <HeroStatsCards />
@@ -227,7 +240,7 @@ export default function App() {
                 {[
                   ['pH safe range', '6.8 - 7.5'],
                   ['Temperature safe range', '20°C - 26°C'],
-                  ['Minimum flow rate', '2.0 L/m'],
+                  ['Water flow (sensor range)', '1 - 30 L/min · info only'],
                 ].map(([label, value]) => (
                   <div key={label} className="rounded-lg border border-border-subtle bg-surface-dark p-4">
                     <p className="text-sm text-muted-foreground">{label}</p>
