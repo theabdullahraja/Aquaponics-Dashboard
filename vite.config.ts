@@ -3,6 +3,7 @@ import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { chatComplete } from './api/_chat-core'
+import { advise } from './api/_advisor-core'
 
 
 function figmaAssetResolver() {
@@ -41,6 +42,33 @@ function devApiPlugin(env) {
               supabaseUrl: env.VITE_SUPABASE_URL,
               supabaseKey: env.VITE_SUPABASE_KEY,
               messages: messages ?? [],
+            })
+            res.end(JSON.stringify(result))
+          } catch (e) {
+            res.statusCode = 500
+            res.end(JSON.stringify({ error: String(e?.message ?? e) }))
+          }
+        })
+      })
+      server.middlewares.use('/api/advisor', (req, res) => {
+        if (req.method !== 'POST') {
+          res.statusCode = 405
+          res.end(JSON.stringify({ error: 'Method not allowed' }))
+          return
+        }
+        let body = ''
+        req.on('data', (c) => (body += c))
+        req.on('end', async () => {
+          res.setHeader('Content-Type', 'application/json')
+          try {
+            const b = JSON.parse(body || '{}')
+            const result = await advise({
+              anthropicKey: env.ANTHROPIC_API_KEY,
+              supabaseUrl: env.VITE_SUPABASE_URL,
+              supabaseKey: env.VITE_SUPABASE_KEY,
+              mode: b.mode === 'chat' ? 'chat' : 'analyze',
+              messages: b.messages ?? [],
+      limits: b.limits,
             })
             res.end(JSON.stringify(result))
           } catch (e) {

@@ -4,55 +4,55 @@
   --font-size: 16px;
 
   /* Aquaponics Color System — Greenhouse Dark */
-  --aqua-blue: #4ADE80;
-  --aqua-blue-light: #22D3EE;
-  --green-growth: #16A34A;
-  --green-growth-light: #86EFAC;
-  --ocean-dark: #0B1A0D;
-  --surface-dark: #071009;
-  --warm-amber: #FB923C;
-  --danger-red: #F87171;
-  --border-subtle: #1F3A22;
-  --text-primary: #F0FDF4;
-  --text-secondary: #9CB89A;
+  --aqua-blue: #a78bfa;
+  --aqua-blue-light: #4dd0e1;
+  --green-growth: #4ade80;
+  --green-growth-light: #86efac;
+  --ocean-dark: #111116;
+  --surface-dark: #0c0c11;
+  --warm-amber: #ffb547;
+  --danger-red: #ff6b8a;
+  --border-subtle: #2d2d3b;
+  --text-primary: #f2f3f5;
+  --text-secondary: #a09fb5;
 
-  --background: #0B1A0D;
-  --foreground: #F0FDF4;
-  --card: #132215;
-  --card-foreground: #F0FDF4;
-  --popover: #132215;
-  --popover-foreground: #F0FDF4;
-  --primary: #4ADE80;
-  --primary-foreground: #061008;
-  --secondary: #1F3A22;
-  --secondary-foreground: #F0FDF4;
-  --muted: #1F3A22;
-  --muted-foreground: #9CB89A;
-  --accent: #22D3EE;
-  --accent-foreground: #061008;
-  --destructive: #F87171;
-  --destructive-foreground: #F0FDF4;
-  --border: #1F3A22;
-  --input: #132215;
-  --input-background: #132215;
-  --switch-background: #1F3A22;
+  --background: #111116;
+  --foreground: #f2f3f5;
+  --card: #1a1a23;
+  --card-foreground: #f2f3f5;
+  --popover: #1a1a23;
+  --popover-foreground: #f2f3f5;
+  --primary: #a78bfa;
+  --primary-foreground: #08090a;
+  --secondary: #262634;
+  --secondary-foreground: #f2f3f5;
+  --muted: #262634;
+  --muted-foreground: #a09fb5;
+  --accent: #4dd0e1;
+  --accent-foreground: #08090a;
+  --destructive: #ff6b8a;
+  --destructive-foreground: #f2f3f5;
+  --border: #2d2d3b;
+  --input: #1a1a23;
+  --input-background: #14141b;
+  --switch-background: #2d2d3b;
   --font-weight-medium: 500;
   --font-weight-normal: 400;
-  --ring: #4ADE80;
-  --chart-1: #4ADE80;
+  --ring: #a78bfa;
+  --chart-1: #a78bfa;
   --chart-2: #22D3EE;
   --chart-3: #FB923C;
-  --chart-4: #86EFAC;
+  --chart-4: #4ade80;
   --chart-5: #67E8F9;
   --radius: 1rem;
-  --sidebar: #0F1E11;
-  --sidebar-foreground: #F0FDF4;
-  --sidebar-primary: #4ADE80;
-  --sidebar-primary-foreground: #061008;
-  --sidebar-accent: #071009;
-  --sidebar-accent-foreground: #F0FDF4;
-  --sidebar-border: #1F3A22;
-  --sidebar-ring: #4ADE80;
+  --sidebar: #14141b;
+  --sidebar-foreground: #f2f3f5;
+  --sidebar-primary: #a78bfa;
+  --sidebar-primary-foreground: #08090a;
+  --sidebar-accent: #0c0c11;
+  --sidebar-accent-foreground: #f2f3f5;
+  --sidebar-border: #3a2a66;
+  --sidebar-ring: #a78bfa;
 }
 
 @theme inline {
@@ -167,3 +167,49 @@
     line-height: 1.5;
   }
 }
+
+/* Header brand: shimmering wordmark, twinkling sparks, travelling "current" along the bar. */
+@keyframes brand-shimmer { to { background-position: 200% center; } }
+@keyframes brand-twinkle { 0%, 100% { opacity: .25; transform: scale(.6) rotate(0deg); } 50% { opacity: 1; transform: scale(1) rotate(25deg); } }
+@keyframes brand-zap { 0%, 88%, 100% { filter: drop-shadow(0 0 0 transparent); } 92% { filter: drop-shadow(0 0 6px #ffe27a); } 96% { filter: drop-shadow(0 0 2px #ffe27a); } }
+@keyframes brand-sweep { from { transform: translateX(-100%); } to { transform: translateX(400%); } }
+.brand-word {
+  background: linear-gradient(90deg, #a78bfa, #4dd0e1, #ffd166, #a78bfa);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: brand-shimmer 5s linear infinite;
+}
+.brand-spark { animation: brand-twinkle 2.4s ease-in-out infinite; }
+.brand-bolt { animation: brand-zap 4s ease-in-out infinite; }
+.brand-current { animation: brand-sweep 4.5s linear infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .brand-word, .brand-spark, .brand-bolt, .brand-current { animation: none; }
+}
+
+/* AI Advisory: a dark, warm "ember" report page (espresso surfaces, copper accent, serif headings).
+   Different from the plum sidebar and charcoal monitoring screens, but still dark. Scoped to the page. */
+.theme-advisor {
+  --color-background: #15100c;
+  --color-card: #1f1812;
+  --color-surface-dark: #120d0a;
+  --color-border-subtle: #3a2d22;
+  --color-input-background: #17120e;
+  --color-foreground: #f5ece0;
+  --color-muted-foreground: #b3a28f;
+  --color-primary-foreground: #1a0f06;
+  --card: #1f1812; --surface-dark: #120d0a; --border-subtle: #3a2d22; --border: #3a2d22; --foreground: #f5ece0; --muted-foreground: #b3a28f; --input-background: #17120e; --background: #15100c;
+  --aqua-blue: #f59e5b; --aqua-blue-light: #fbbf6a; --warm-amber: #fbbf24; --danger-red: #ff6b81; --green-growth: #7ddba3; --primary: #f59e5b; --primary-foreground: #1a0f06;
+  --color-aqua-blue: #f59e5b;        /* copper */
+  --color-aqua-blue-light: #fbbf6a;
+  --color-warm-amber: #fbbf24;
+  --color-danger-red: #ff6b81;
+  --color-green-growth: #7ddba3;
+  background:
+    radial-gradient(700px 320px at 100% 0%, rgba(245, 158, 91, 0.16), transparent 65%),
+    radial-gradient(600px 320px at 0% 100%, rgba(125, 219, 163, 0.07), transparent 65%),
+    #15100c;
+  color: #f5ece0;
+  border: 1px solid #3a2d22;
+  box-shadow: 0 30px 70px -40px rgba(0, 0, 0, 0.8);
+}
+.theme-advisor .font-serif { font-family: Georgia, 'Iowan Old Style', 'Times New Roman', serif; }

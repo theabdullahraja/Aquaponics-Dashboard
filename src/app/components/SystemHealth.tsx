@@ -5,7 +5,7 @@ import { evaluateReading, healthFromReading, type Status } from '../../lib/healt
 function statusView(status: Status) {
   switch (status) {
     case 'ok':
-      return { icon: Check, color: '#10B981', text: 'normal' };
+      return { icon: Check, color: '#4ade80', text: 'normal' };
     case 'high':
       return { icon: AlertTriangle, color: '#F59E0B', text: 'high' };
     case 'low':
@@ -24,7 +24,7 @@ export function SystemHealth() {
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
 
-  const ringColor = score >= 90 ? '#10B981' : score >= 70 ? '#F59E0B' : '#EF4444';
+  const ringColor = score >= 90 ? '#4ade80' : score >= 70 ? '#F59E0B' : '#EF4444';
 
   return (
     <div className="min-w-0 bg-card rounded-xl p-5 border border-border-subtle h-full">
@@ -34,7 +34,7 @@ export function SystemHealth() {
       <div className="flex flex-col items-center mb-6">
         <div className="relative w-32 h-32">
           <svg className="transform -rotate-90" width="128" height="128">
-            <circle cx="64" cy="64" r="54" stroke="#1F3A22" strokeWidth="12" fill="none" />
+            <circle cx="64" cy="64" r="54" stroke="#2d2d3b" strokeWidth="12" fill="none" />
             <circle
               cx="64"
               cy="64"

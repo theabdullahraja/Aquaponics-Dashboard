@@ -3,12 +3,58 @@ import type { Reading } from './useAquaponics';
 // Aquaponics safe ranges (also shown on the Settings page). pH + temperature drive
 // health/alerts; flow is shown as info (0 is normal when the water pump is off, so a
 // blanket low-flow alert would be noise).
-export const THRESHOLDS = {
+export const DEFAULT_THRESHOLDS = {
   temp_c: { min: 20, max: 26, label: 'Temperature', unit: '°C', digits: 1 },
   ph: { min: 6.8, max: 7.5, label: 'pH', unit: '', digits: 2 },
-} as const;
+};
+type Threshold = { min: number; max: number; label: string; unit: string; digits: number };
+type Ranges = { ph: [number, number]; temp_c: [number, number] };
 
-export type SensorKey = keyof typeof THRESHOLDS;
+// Safe ranges are user-adjustable (Settings page) and persisted in this browser.
+// THRESHOLDS is mutated in place so every module that reads it sees the new values;
+// subscribers (subscribeThresholds) re-render when it changes.
+export const THRESHOLDS: Record<keyof typeof DEFAULT_THRESHOLDS, Threshold> = JSON.parse(JSON.stringify(DEFAULT_THRESHOLDS));
+const STORAGE_KEY = 'aqua-thresholds';
+const listeners = new Set<() => void>();
+let version = 0;
+
+export function validateRanges(r: Ranges): string | null {
+  if (![...r.ph, ...r.temp_c].every((v) => Number.isFinite(v))) return 'Enter a number in every field.';
+  if (r.ph[0] >= r.ph[1]) return 'pH minimum must be lower than the maximum.';
+  if (r.temp_c[0] >= r.temp_c[1]) return 'Temperature minimum must be lower than the maximum.';
+  if (r.ph[0] < 0 || r.ph[1] > 14) return 'pH must be between 0 and 14.';
+  if (r.temp_c[0] < 0 || r.temp_c[1] > 50) return 'Temperature must be between 0 and 50 °C.';
+  return null;
+}
+
+function apply(r: Ranges) {
+  THRESHOLDS.ph.min = r.ph[0]; THRESHOLDS.ph.max = r.ph[1];
+  THRESHOLDS.temp_c.min = r.temp_c[0]; THRESHOLDS.temp_c.max = r.temp_c[1];
+  version++;
+  listeners.forEach((l) => l());
+}
+
+export function saveThresholds(r: Ranges) {
+  apply(r);
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(r)); } catch { /* ignore */ }
+}
+export function resetThresholds() {
+  apply({ ph: [DEFAULT_THRESHOLDS.ph.min, DEFAULT_THRESHOLDS.ph.max], temp_c: [DEFAULT_THRESHOLDS.temp_c.min, DEFAULT_THRESHOLDS.temp_c.max] });
+  try { localStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
+}
+export function subscribeThresholds(cb: () => void) { listeners.add(cb); return () => { listeners.delete(cb); }; }
+export function thresholdsVersion() { return version; }
+/** Current ranges in the shape the AI Advisory endpoint expects. */
+export function currentLimits() {
+  return { ph: { min: THRESHOLDS.ph.min, max: THRESHOLDS.ph.max }, temp: { min: THRESHOLDS.temp_c.min, max: THRESHOLDS.temp_c.max } };
+}
+
+try {
+  const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null');
+  if (saved && !validateRanges(saved)) apply(saved);
+} catch { /* ignore */ }
+
+export type SensorKey = keyof typeof DEFAULT_THRESHOLDS;
 export type Status = 'ok' | 'high' | 'low' | 'unknown';
 
 export interface SensorEval {

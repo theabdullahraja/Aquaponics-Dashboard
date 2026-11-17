@@ -11,7 +11,7 @@ const CIRCUMFERENCE = 2 * Math.PI * 44;
 const sensors = [
   { id: 'ph',    label: 'pH Level',    value: 7.2,  max: 14,  unit: '',    color: '#22D3EE', delay: 0   },
   { id: 'temp',  label: 'Temperature', value: 23.5, max: 40,  unit: '°C',  color: '#FB923C', delay: 120 },
-  { id: 'flow',  label: 'Water Flow',  value: 2.4,  max: 4,   unit: 'L/m', color: '#4ADE80', delay: 240 },
+  { id: 'flow',  label: 'Water Flow',  value: 2.4,  max: 4,   unit: 'L/m', color: '#a78bfa', delay: 240 },
 ];
 
 const tickerData = [
@@ -21,7 +21,7 @@ const tickerData = [
 ];
 
 const STATUS_COLOR: Record<string, string> = {
-  optimal: '#4ADE80',
+  optimal: '#a78bfa',
   normal:  '#FB923C',
   warning: '#F87171',
 };
@@ -168,7 +168,7 @@ export function LandingPage({ onOpenDashboard, onOpenAI }: LandingPageProps) {
               Your farm,{' '}
               <span
                 style={{
-                  background: 'linear-gradient(90deg, #4ADE80 0%, #22D3EE 100%)',
+                  background: 'linear-gradient(90deg, #a78bfa 0%, #22D3EE 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
@@ -199,9 +199,9 @@ export function LandingPage({ onOpenDashboard, onOpenAI }: LandingPageProps) {
               onClick={onOpenDashboard}
               className="flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm active:scale-[0.98] transition-all"
               style={{
-                background: '#4ADE80',
+                background: '#a78bfa',
                 color: '#061008',
-                boxShadow: '0 4px 22px rgba(74,222,128,0.35)',
+                boxShadow: '0 4px 22px rgba(167,139,250,0.35)',
               }}
             >
               <LayoutDashboard className="w-4 h-4" />

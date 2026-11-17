@@ -11,8 +11,8 @@ const METRICS: {
   digits: number;
   range: { min: number; max: number } | null;
 }[] = [
-  { key: 'temp_c', label: 'Temperature', unit: '°C', digits: 1, range: { min: THRESHOLDS.temp_c.min, max: THRESHOLDS.temp_c.max } },
-  { key: 'ph', label: 'pH', unit: '', digits: 2, range: { min: THRESHOLDS.ph.min, max: THRESHOLDS.ph.max } },
+  { key: 'temp_c', label: 'Temperature', unit: '°C', digits: 1, get range() { return { min: THRESHOLDS.temp_c.min, max: THRESHOLDS.temp_c.max }; } },
+  { key: 'ph', label: 'pH', unit: '', digits: 2, get range() { return { min: THRESHOLDS.ph.min, max: THRESHOLDS.ph.max }; } },
   { key: 'flow_lpm', label: 'Water Flow', unit: ' L/min', digits: 1, range: null },
 ];
 
@@ -56,7 +56,7 @@ export function Analytics() {
               status = { text: 'Above range', color: '#F59E0B' };
               TrendIcon = TrendingUp;
             } else {
-              status = { text: 'In range', color: '#10B981' };
+              status = { text: 'In range', color: '#4ade80' };
               TrendIcon = Minus;
             }
           }

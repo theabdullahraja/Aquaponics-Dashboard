@@ -11,7 +11,7 @@ const tiles = [
     icon: Zap,
     title: 'Smart Control System',
     desc: 'Toggle pumps, run diagnostics, and automate cycles directly from your dashboard.',
-    color: '#10B981',
+    color: '#4dd0c4',
   },
   {
     icon: Bot,

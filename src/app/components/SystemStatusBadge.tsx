@@ -9,7 +9,7 @@ export function SystemStatusBadge() {
 
   const ageSec = reading ? Math.max(0, Math.round((Date.now() - new Date(reading.ts).getTime()) / 1000)) : null;
   const ageText =
-    ageSec == null ? 'no data' : ageSec < 60 ? `${ageSec}s ago` : `${Math.round(ageSec / 60)}m ago`;
+    ageSec == null ? 'no data' : ageSec < 60 ? `${ageSec}s ago` : ageSec < 3600 ? `${Math.round(ageSec / 60)}m ago` : ageSec < 86400 ? `${Math.round(ageSec / 3600)}h ago` : `${Math.round(ageSec / 86400)}d ago`;
 
   return (
     <span

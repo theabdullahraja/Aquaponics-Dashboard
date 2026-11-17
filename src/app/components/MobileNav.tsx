@@ -1,4 +1,4 @@
-import { Home, BarChart3, Bell, Bot, Settings } from 'lucide-react';
+import { Home, BarChart3, Bell, Bot, Settings, Sparkles } from 'lucide-react';
 
 interface MobileNavProps {
   currentView: string;
@@ -10,6 +10,7 @@ export function MobileNav({ currentView, onViewChange, alertCount = 0 }: MobileN
   const navItems = [
     { id: 'dashboard', icon: Home, label: 'Home' },
     { id: 'analytics', icon: BarChart3, label: 'Analytics' },
+    { id: 'advisory', icon: Sparkles, label: 'Advisor' },
     { id: 'alerts', icon: Bell, label: 'Alerts', badge: alertCount },
     { id: 'ai', icon: Bot, label: 'AI' },
     { id: 'settings', icon: Settings, label: 'More' },

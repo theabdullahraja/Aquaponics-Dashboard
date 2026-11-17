@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useSyncExternalStore } from 'react';
 import { Bell, Settings, Bot, SlidersHorizontal, User, LogOut } from 'lucide-react';
 import { Sidebar } from './components/Sidebar';
 import { MobileNav } from './components/MobileNav';
@@ -13,8 +13,12 @@ import { LoginPage } from './components/LoginPage';
 import { SystemStatusBadge } from './components/SystemStatusBadge';
 import { PastData } from './components/PastData';
 import { Analytics } from './components/Analytics';
+import { AIAdvisory } from './components/AIAdvisory';
+import { HeaderBrand } from './components/HeaderBrand';
+import { StatusHero } from './components/StatusHero';
+import { SettingsPanel } from './components/SettingsPanel';
 import { useLatestReading, useSystemOnline } from '../lib/useAquaponics';
-import { alertsFromReading } from '../lib/health';
+import { alertsFromReading, subscribeThresholds, thresholdsVersion } from '../lib/health';
 import { getSession, onAuthChange, signOut } from '../lib/auth';
 
 export default function App() {
@@ -28,6 +32,7 @@ export default function App() {
     'Let us keep your aquaponics system healthy and stable today.',
   );
   const [authed, setAuthed] = useState(false);
+  useSyncExternalStore(subscribeThresholds, thresholdsVersion); // re-render when safe ranges change
   const latestReading = useLatestReading();
   const online = useSystemOnline(latestReading);
   const alertCount = alertsFromReading(latestReading, online).length;
@@ -110,9 +115,11 @@ export default function App() {
       <div className={`transition-all duration-300 ${isChatbotOpen ? 'lg:mr-[360px]' : ''} ${isSidebarCollapsed ? 'lg:ml-[60px]' : 'lg:ml-[280px]'}`}>
         <header className={`fixed top-0 right-0 left-0 h-16 lg:h-20 bg-card/95 backdrop-blur-lg border-b border-border-subtle z-30 px-4 lg:px-8 transition-all duration-300 ${isSidebarCollapsed ? 'lg:left-[60px]' : 'lg:left-[280px]'}`}>
           <div className="h-full flex items-center justify-between">
+            <div className="flex items-center">
+              <div className="lg:hidden"><HeaderBrand onClick={() => setPage('landing')} /></div>
             <div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl lg:text-2xl font-semibold text-foreground">System Overview</h1>
+                <h1 className="text-xl lg:text-2xl font-semibold text-foreground">{({ dashboard: 'Overview', analytics: 'Analytics', advisory: 'AI Advisory', alerts: 'Alerts', history: 'Past Data', settings: 'Settings' } as Record<string, string>)[currentView] ?? 'Overview'}</h1>
                 <SystemStatusBadge />
               </div>
               <p className="text-xs lg:text-sm text-muted-foreground mt-0.5 hidden sm:block">
@@ -123,6 +130,7 @@ export default function App() {
                   day: 'numeric',
                 })}
               </p>
+            </div>
             </div>
 
             <div className="flex items-center gap-2 lg:gap-4">
@@ -185,71 +193,44 @@ export default function App() {
               </div>
             </div>
           </div>
+          <div aria-hidden className="absolute bottom-0 left-0 right-0 h-px overflow-hidden">
+            <div className="brand-current h-px w-1/4 bg-gradient-to-r from-transparent via-aqua-blue-light to-transparent" />
+          </div>
         </header>
 
         <main className="pt-20 lg:pt-24 px-4 lg:px-8 pb-12 space-y-6 lg:space-y-8">
           {currentView === 'dashboard' && (
             <>
-              <section className="relative overflow-hidden rounded-xl border border-border-subtle bg-gradient-to-r from-card via-card to-surface-dark p-5 lg:p-6">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -left-16 -top-20 h-56 w-56 rounded-full bg-aqua-blue/10 blur-3xl"
-                />
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute -bottom-24 right-10 h-56 w-56 rounded-full bg-aqua-blue-light/10 blur-3xl"
-                />
-                <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-widest text-aqua-blue">Smart Aquaponics</p>
-                  <h2 className="mt-1.5 text-2xl lg:text-3xl font-semibold tracking-tight text-foreground">
-                    Welcome back, Abdullah Khan
-                  </h2>
-                  <p className="mt-1.5 text-sm lg:text-base text-muted-foreground">{welcomeMessage}</p>
-                </div>
-              </section>
+              <StatusHero
+                name="Abdullah"
+                onOpenAdvisory={() => setCurrentView('advisory')}
+                onOpenAlerts={() => setCurrentView('alerts')}
+              />
 
               <HeroStatsCards />
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2">
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                <div className="xl:col-span-2 min-w-0">
                   <RealTimeMonitor />
                 </div>
-                <div>
-                  <SystemHealth />
+                <div className="min-w-0">
+                  <ControlPanel />
                 </div>
               </div>
 
-              <ControlPanel />
               <AlertFeed />
             </>
           )}
 
           {currentView === 'analytics' && <Analytics />}
 
+          {currentView === 'advisory' && <AIAdvisory />}
+
           {currentView === 'alerts' && <AlertFeed />}
 
           {currentView === 'history' && <PastData />}
 
-          {currentView === 'settings' && (
-            <div className="bg-card rounded-lg p-6 border border-border-subtle">
-              <div className="flex items-center gap-3 mb-5">
-                <SlidersHorizontal className="w-5 h-5 text-aqua-blue" />
-                <h2 className="text-2xl font-semibold text-foreground">Threshold Settings</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
-                  ['pH safe range', '6.8 - 7.5'],
-                  ['Temperature safe range', '20°C - 26°C'],
-                  ['Water flow (sensor range)', '1 - 30 L/min · info only'],
-                ].map(([label, value]) => (
-                  <div key={label} className="rounded-lg border border-border-subtle bg-surface-dark p-4">
-                    <p className="text-sm text-muted-foreground">{label}</p>
-                    <p className="text-lg font-mono font-semibold text-foreground mt-1">{value}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {currentView === 'settings' && <SettingsPanel />}
         </main>
       </div>
 

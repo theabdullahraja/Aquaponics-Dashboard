@@ -4,7 +4,7 @@ import { THRESHOLDS } from '../../lib/health';
 
 type Point = { time: string; ph: number | null; temp: number | null; flow: number | null };
 
-const axis = { stroke: '#7E9A80', fontSize: 11, tickLine: false, axisLine: false } as const;
+const axis = { stroke: '#8f8ea6', fontSize: 11, tickLine: false, axisLine: false } as const;
 
 function ChartTooltip({ active, payload, unit, digits }: any) {
   if (!active || !payload || !payload.length) return null;
@@ -72,7 +72,7 @@ function ChartCard({ title, data, dataKey, color, unit, digits, safe, fixedDomai
             </linearGradient>
           </defs>
           <CartesianGrid vertical={false} stroke="#ffffff" strokeOpacity={0.05} />
-          {safe && <ReferenceArea y1={safe.min} y2={safe.max} fill="#4ADE80" fillOpacity={0.07} stroke="#4ADE80" strokeOpacity={0.25} strokeDasharray="3 3" />}
+          {safe && <ReferenceArea y1={safe.min} y2={safe.max} fill="#4ade80" fillOpacity={0.08} stroke="#4ade80" strokeOpacity={0.25} strokeDasharray="3 3" />}
           <XAxis dataKey="time" {...axis} minTickGap={48} interval="preserveStartEnd" />
           <YAxis {...axis} domain={domain} width={38} tickFormatter={(v) => Number(v).toFixed(1)} />
           <Tooltip content={<ChartTooltip unit={unit} digits={digits} />} cursor={{ stroke: color, strokeOpacity: 0.3 }} />
@@ -118,7 +118,7 @@ export function RealTimeMonitor() {
             title="pH"
             data={data}
             dataKey="ph"
-            color="#38BDF8"
+            color="#b794f6"
             unit=""
             digits={2}
             safe={{ min: THRESHOLDS.ph.min, max: THRESHOLDS.ph.max }}
@@ -127,12 +127,12 @@ export function RealTimeMonitor() {
             title="Temperature"
             data={data}
             dataKey="temp"
-            color="#FBBF24"
+            color="#ff9f6b"
             unit="°C"
             digits={1}
             safe={{ min: THRESHOLDS.temp_c.min, max: THRESHOLDS.temp_c.max }}
           />
-          <ChartCard title="Water Flow" data={data} dataKey="flow" color="#22D3EE" unit=" L/m" digits={1} fixedDomain={[0, 30]} />
+          <ChartCard title="Water Flow" data={data} dataKey="flow" color="#4dd0e1" unit=" L/m" digits={1} fixedDomain={[0, 30]} />
         </div>
       </div>
     </div>
